@@ -37,6 +37,15 @@ Before writing any code, ask these questions and record the answers:
 **1. How many pages does the app have?**
 List the routes (e.g. `/`, `/dashboard`, `/settings`, `/profile`). Each page with async data needs a `loading.tsx`.
 
+**1a. Does each page need SEO?**
+For each page, ask: does it need to be indexed by search engines?
+
+- **SEO required** (landing pages, public content) → the page should be a Server Component that fetches data on the server. `loading.tsx` works perfectly alongside it — crawlers hit `page.tsx` directly and never see `loading.tsx`, so SEO is unaffected. `loading.tsx` is only shown during client-side navigation.
+- **SEO not required** (auth-gated dashboards, user-specific data) → the page can be purely client-side (fetching in `useQuery` / hooks). A `loading.tsx` still helps with the blank navigation flash, but the component manages its own loading state internally. In this case a minimal `loading.tsx` (just the page shell/layout, no skeleton rows) is sufficient.
+- **No `loading.tsx` at all** — valid choice if the user explicitly wants to skip it for a page. The blank flash remains but nothing breaks.
+
+> Key rule: never add `loading.tsx` to a page that previously rendered on the server if doing so requires converting it to client-only. That would break SEO. Keep Server Components server-side; `loading.tsx` sits beside them, not instead of them.
+
 **2. How complex is each page's loading state?**
 - Simple: just a spinner or blank shell → minimal `loading.tsx`
 - Medium: page has a header + table → render header + skeleton rows
@@ -310,3 +319,6 @@ RUN pnpm run build
 | Transitions not working | Check that nav links use `next-view-transitions`'s `Link`, not `next/link` |
 | Black/white flash on specific page | That page has a `<Suspense fallback={null}>` — remove it and let `loading.tsx` handle it |
 | TypeScript errors in `loading.tsx` | Inline the fallback values — don't export them from PageClient |
+| Page needs SEO — should I add `loading.tsx`? | Yes — `loading.tsx` only shows during client navigation, never to crawlers. Keep `page.tsx` as a Server Component; `loading.tsx` sits beside it safely |
+| Page is client-only (no SEO needed) — should I add `loading.tsx`? | Optional. A minimal shell `loading.tsx` still removes the blank flash. The component handles its own skeleton rows internally |
+| User wants to skip `loading.tsx` on a specific page | Fine — skip it. The navigation flash stays but nothing breaks. Not every page needs it |
