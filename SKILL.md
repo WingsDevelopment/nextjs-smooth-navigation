@@ -66,9 +66,6 @@ Present as a checklist and let them pick:
 - [ ] D) `next-view-transitions` — animated crossfade between pages
 - [ ] E) CSS transition duration tuning — control crossfade speed
 
-**6. Are they on Railway, Vercel, or another host?**
-Submodule or monorepo setups may need host-specific config (covered in Step 6).
-
 Present a summary plan and confirm before implementing anything.
 
 ---
@@ -283,26 +280,6 @@ Default crossfade is ~250ms. Customize in `globals.css`:
 
 ### Browser support
 Supported in Chrome 111+, Edge 111+, Safari 18.2+. Falls back gracefully (instant navigation, no transition) in Firefox and older browsers.
-
----
-
-## Step 6 — Deployment considerations
-
-### Vercel
-If using a git submodule for a local package dependency, override the install command in `vercel.json`:
-```json
-{
-  "installCommand": "git submodule update --init --recursive && pnpm install"
-}
-```
-
-### Railway (Nixpacks / Dockerfile)
-If using Dockerfile, clone the submodule directly instead of relying on `git submodule update` (Docker's `COPY . .` doesn't copy `.git`):
-```dockerfile
-RUN git clone --depth=1 https://github.com/your-org/your-sdk.git sdk-dir
-RUN pnpm install --frozen-lockfile
-RUN pnpm run build
-```
 
 ---
 
